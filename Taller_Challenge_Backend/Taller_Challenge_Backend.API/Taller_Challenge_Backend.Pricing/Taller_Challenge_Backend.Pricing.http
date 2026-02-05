@@ -1,0 +1,6 @@
+@Taller_Challenge_Backend.Pricing_HostAddress = http://localhost:5112
+
+GET {{Taller_Challenge_Backend.Pricing_HostAddress}}/weatherforecast/
+Accept: application/json
+
+###
