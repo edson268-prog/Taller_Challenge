@@ -1,0 +1,15 @@
+[
+  {
+    "Name": "Both",
+    "Projects": [
+      {
+        "Path": "Taller_Challenge_Backend.API\\Taller_Challenge_Backend.API.csproj",
+        "Action": "Start"
+      },
+      {
+        "Path": "Taller_Challenge_Backend.Pricing\\Taller_Challenge_Backend.Pricing.csproj",
+        "Action": "Start"
+      }
+    ]
+  }
+]

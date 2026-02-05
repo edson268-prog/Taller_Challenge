@@ -1,5 +1,10 @@
 using Asp.Versioning;
-using Microsoft.AspNetCore.Builder;
+using Microsoft.OpenApi.Models;
+using Taller_Challenge_Backend.API.Common;
+using Taller_Challenge_Backend.API.Middleware;
+using Taller_Challenge_Backend.API.Orders;
+using Taller_Challenge_Backend.Infrastructure;
+using Taller_Challenge_Backend.Infrastructure.Data;
 
 var builder = WebApplication.CreateBuilder(args);
 
@@ -22,52 +27,45 @@ builder.Services.AddApiVersioning(options =>
     options.AssumeDefaultVersionWhenUnspecified = true;
 });
 
+builder.Services.AddInfrastructure(builder.Configuration, builder.Environment);
+
 // Add services to the container.
 // Learn more about configuring Swagger/OpenAPI at https://aka.ms/aspnetcore/swashbuckle
 builder.Services.AddEndpointsApiExplorer();
-builder.Services.AddSwaggerGen();
+builder.Services.AddSwaggerGen(c =>
+{
+    c.SwaggerDoc("v1", new OpenApiInfo
+    {
+        Title = "EX Squared Challenge",
+        Version = "v1"
+    });
+});
+
+builder.Services.AddInfrastructure(builder.Configuration, builder.Environment);
 
 var app = builder.Build();
+
+app.UseMiddleware<ExceptionMiddleware>();
+
+using (var scope = app.Services.CreateScope())
+{
+    var context = scope.ServiceProvider.GetRequiredService<AppDbContext>();
+    DatabaseInitializer.Initialize(context);
+}
 
 app.UseCors("CorsPolicy");
 
 // Configure the HTTP request pipeline.
-
-app.UseHttpsRedirection();
-
-var summaries = new[]
-{
-    "Freezing", "Bracing", "Chilly", "Cool", "Mild", "Warm", "Balmy", "Hot", "Sweltering", "Scorching"
-};
-
-app.MapGet("/weatherforecast", () =>
-{
-    var forecast = Enumerable.Range(1, 5).Select(index =>
-        new WeatherForecast
-        (
-            DateOnly.FromDateTime(DateTime.Now.AddDays(index)),
-            Random.Shared.Next(-20, 55),
-            summaries[Random.Shared.Next(summaries.Length)]
-        ))
-        .ToArray();
-    return forecast;
-});
 
 var versionSet = app.NewApiVersionSet()
     .HasApiVersion(new Asp.Versioning.ApiVersion(1))
     .ReportApiVersions()
     .Build();
 
-if (app.Environment.IsDevelopment())
-{
-    app.UseSwagger();
-    app.UseSwaggerUI();
-}
+app.Map<OrdersEndpoints>(versionSet);
+
+app.UseSwagger();
+app.UseSwaggerUI();
 
 app.UseHttpsRedirection();
 app.Run();
-
-internal record WeatherForecast(DateOnly Date, int TemperatureC, string? Summary)
-{
-    public int TemperatureF => 32 + (int)(TemperatureC / 0.5556);
-}
