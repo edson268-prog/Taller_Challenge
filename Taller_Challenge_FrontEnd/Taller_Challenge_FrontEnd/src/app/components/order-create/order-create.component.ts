@@ -137,8 +137,6 @@ export class OrderCreateComponent implements OnInit {
         }, 2000);
       },
       error: (err) => {
-        console.error('Error creating order:', err);
-
         let errorMessage = 'Error creating order. Please try again.';
         if (err.status === 400) {
           errorMessage = 'Invalid data. Please check all fields.';

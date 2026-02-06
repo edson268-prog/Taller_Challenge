@@ -1,6 +1,6 @@
 import { HttpClient, HttpParams } from '@angular/common/http';
 import { Injectable } from '@angular/core';
-import { Order, OrderStatusUpdate } from '../models/order';
+import { Order, OrderParams, OrderStatusUpdate } from '../models/order';
 import { Observable } from 'rxjs';
 import { environment } from '../../environments/environment';
 
@@ -16,11 +16,17 @@ export class OrderService {
     return this.http.post<Order>(this.apiUrl, order);
   }
 
-  getOrders(status?: string): Observable<Order[]> {
+  getOrders(queryParams: OrderParams): Observable<Order[]> {
     let params = new HttpParams();
-    if (status) {
-      params = params.set('status', status);
-    }
+
+    if (queryParams.status) params = params.set('status', queryParams.status);
+    if (queryParams.page)
+      params = params.set('page', queryParams.page.toString());
+    if (queryParams.pageSize)
+      params = params.set('pageSize', queryParams.pageSize.toString());
+    if (queryParams.sortOrder)
+      params = params.set('sortOrder', queryParams.sortOrder);
+
     return this.http.get<Order[]>(this.apiUrl, { params });
   }
 

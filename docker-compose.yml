@@ -1,5 +1,5 @@
 ﻿services:
-  backend-api:
+  orders-service:
     container_name: taller-api-container
     build:
       context: ./Taller_Challenge_Backend/Taller_Challenge_Backend.API
@@ -42,5 +42,5 @@
     ports:
       - "4205:80"
     depends_on:
-      - backend-api
+      - orders-service
       - pricing-service

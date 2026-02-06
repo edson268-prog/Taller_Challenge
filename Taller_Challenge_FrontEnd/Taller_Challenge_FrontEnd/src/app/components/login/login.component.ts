@@ -1,8 +1,9 @@
 import { CommonModule } from '@angular/common';
-import { Component } from '@angular/core';
+import { Component, inject } from '@angular/core';
 import { Router } from '@angular/router';
 import { FormsModule } from '@angular/forms';
 import { Credentials } from '../../models/auth';
+import { AuthService } from '../../services/auth.service';
 
 @Component({
   selector: 'app-login',
@@ -12,22 +13,27 @@ import { Credentials } from '../../models/auth';
   styleUrl: './login.component.css',
 })
 export class LoginComponent {
-  loading = false;
-  credentials: Credentials = {
-    username: '',
-    password: '',
-  };
+  private authService = inject(AuthService);
+  private router = inject(Router);
 
-  constructor(private router: Router) {}
+  credentials: Credentials = { username: '', password: '' };
+
+  loading = false;
 
   onSubmit() {
-    this.loading = true;
+    if (this.credentials.username && this.credentials.password) {
+      this.loading = true;
 
-    setTimeout(() => {
-      this.loading = false;
-      localStorage.setItem('isLoggedIn', 'true');
-      localStorage.setItem('username', this.credentials.username || 'Admin');
-      this.router.navigate(['/home']);
-    }, 800);
+      this.authService.login(this.credentials).subscribe({
+        next: (response) => {
+          this.loading = false;
+          this.router.navigate(['/home']);
+        },
+        error: (err) => {
+          this.loading = false;
+          alert('Wrong credentials, please try again.');
+        },
+      });
+    }
   }
 }

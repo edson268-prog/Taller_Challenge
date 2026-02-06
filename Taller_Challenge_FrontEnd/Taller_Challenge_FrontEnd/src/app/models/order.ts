@@ -28,3 +28,10 @@ export enum OrderStatus {
 export interface OrderStatusUpdate {
   status: OrderStatus;
 }
+
+export interface OrderParams {
+  status?: OrderStatus | string | null;
+  page?: number;
+  pageSize?: number;
+  sortOrder?: string;
+}

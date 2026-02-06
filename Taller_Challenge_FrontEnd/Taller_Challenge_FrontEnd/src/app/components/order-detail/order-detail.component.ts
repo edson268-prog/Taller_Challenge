@@ -41,7 +41,6 @@ export class OrderDetailComponent implements OnInit {
       error: (err) => {
         this.error = 'Error loading order details.';
         this.loading = false;
-        console.error('Error loading order:', err);
       },
     });
   }
@@ -58,7 +57,6 @@ export class OrderDetailComponent implements OnInit {
         console.log('Status updated successfully.');
       },
       error: (err) => {
-        console.error('Error updating status:', err);
         alert('Error updating status.');
         this.loadOrder();
       },
@@ -76,7 +74,6 @@ export class OrderDetailComponent implements OnInit {
       },
       error: (err) => {
         this.loading = false;
-        console.error('Error calculating price:', err);
         this.loadOrder();
         this.error = 'Error calculating price.';
       },
