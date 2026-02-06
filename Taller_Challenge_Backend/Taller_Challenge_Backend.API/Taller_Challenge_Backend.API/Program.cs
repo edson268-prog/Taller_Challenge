@@ -1,10 +1,11 @@
 using Asp.Versioning;
-using Microsoft.OpenApi.Models;
+using Taller_Challenge_Backend.API.Auth;
 using Taller_Challenge_Backend.API.Common;
 using Taller_Challenge_Backend.API.Middleware;
 using Taller_Challenge_Backend.API.Orders;
 using Taller_Challenge_Backend.Infrastructure;
 using Taller_Challenge_Backend.Infrastructure.Data;
+using Taller_Challenge_Backend.Infrastructure.Extensions;
 
 var builder = WebApplication.CreateBuilder(args);
 
@@ -29,17 +30,11 @@ builder.Services.AddApiVersioning(options =>
 
 builder.Services.AddInfrastructure(builder.Configuration, builder.Environment);
 
-// Add services to the container.
 // Learn more about configuring Swagger/OpenAPI at https://aka.ms/aspnetcore/swashbuckle
-builder.Services.AddEndpointsApiExplorer();
-builder.Services.AddSwaggerGen(c =>
-{
-    c.SwaggerDoc("v1", new OpenApiInfo
-    {
-        Title = "EX Squared Challenge",
-        Version = "v1"
-    });
-});
+builder.Services.AddEndpointsApiExplorer()
+    .AddJwtAuthentication(builder.Configuration)
+    .AddSwaggerDocumentation()
+    .AddAuthorization();
 
 builder.Services.AddInfrastructure(builder.Configuration, builder.Environment);
 
@@ -62,10 +57,15 @@ var versionSet = app.NewApiVersionSet()
     .ReportApiVersions()
     .Build();
 
+app.Map<AuthEndpoints>(versionSet);
 app.Map<OrdersEndpoints>(versionSet);
 
 app.UseSwagger();
 app.UseSwaggerUI();
 
 app.UseHttpsRedirection();
+
+app.UseAuthentication();
+app.UseAuthorization();
+
 app.Run();

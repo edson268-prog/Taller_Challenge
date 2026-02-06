@@ -22,28 +22,23 @@ namespace Taller_Challenge_Backend.Infrastructure.Repositories
                 .FirstOrDefaultAsync(o => o.Id == id, cancellationToken);
         }
 
-        public async Task<IEnumerable<Order>> GetAllAsync(CancellationToken cancellationToken = default)
+        public async Task<IEnumerable<Order>> GetFilteredOrdersAsync(OrderStatus? status, int page, int pageSize, string? sortOrder, CancellationToken cancellationToken = default)
         {
-            return await _context.Orders
-                .Include(o => o.Items)
-                .OrderByDescending(o => o.CreatedAt)
-                .ToListAsync(cancellationToken);
-        }
+            var query = _context.Orders.Include(o => o.Items).AsQueryable();
 
-        public async Task<IEnumerable<Order>> GetByStatusAsync(OrderStatus status, CancellationToken cancellationToken = default)
-        {
-            return await _context.Orders
-                .Include(o => o.Items)
-                .Where(o => o.Status == status)
-                .OrderByDescending(o => o.CreatedAt)
-                .ToListAsync(cancellationToken);
-        }
+            if (status.HasValue)
+            {
+                query = query.Where(o => o.Status == status.Value);
+            }
 
-        public async Task<IEnumerable<Order>> GetWithPagingAsync(int page, int pageSize, CancellationToken cancellationToken = default)
-        {
-            return await _context.Orders
-                .Include(o => o.Items)
-                .OrderByDescending(o => o.CreatedAt)
+            query = sortOrder?.ToLower() switch
+            {
+                "asc" => query.OrderBy(o => o.CreatedAt),
+                "status" => query.OrderBy(o => o.Status),
+                _ => query.OrderByDescending(o => o.CreatedAt)
+            };
+
+            return await query
                 .Skip((page - 1) * pageSize)
                 .Take(pageSize)
                 .ToListAsync(cancellationToken);

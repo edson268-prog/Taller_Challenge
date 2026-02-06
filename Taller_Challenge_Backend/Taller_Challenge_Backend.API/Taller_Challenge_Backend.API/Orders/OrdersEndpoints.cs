@@ -13,18 +13,19 @@ namespace Taller_Challenge_Backend.API.Orders
             var group = builder.MapGroup("/api/v1/orders")
                 .WithTags("Order")
                 .WithApiVersionSet(versions)
-                .MapToApiVersion(1);
+                .MapToApiVersion(1)
+                .RequireAuthorization();
 
             // Applied all required endpoints
 
             // GET /orders
             group.MapGet("/", GetAllOrdersQuery.ExecuteQuery)
-                .Produces<IEnumerable<OrderResponse>>(StatusCodes.Status200OK)
+                .Produces<PaginatedResponse<OrderResponse>>(StatusCodes.Status200OK)
                 .ProducesProblem(StatusCodes.Status400BadRequest)
                 .ProducesProblem(StatusCodes.Status500InternalServerError)
                 .WithName("GetOrders")
-                .WithSummary("Get all orders")
-                .WithDescription("Retrieve orders with optional status filter");
+                .WithSummary("Get orders with filtering, pagination and sorting")
+                .WithDescription("Retrieve orders with optional filters, pagination and sorting functions");
 
             // GET /orders/{id}
             group.MapGet("/{id:guid}", GetOrderByIdQuery.ExecuteQuery)

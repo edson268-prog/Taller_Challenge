@@ -6,9 +6,7 @@ namespace Taller_Challenge_Backend.API.Orders.Queries
 {
     public static class GetOrderByIdQuery
     {
-        public static async Task<IResult> ExecuteQuery(
-        [FromRoute] Guid id,
-        [FromServices] IOrderRepository orderRepository)
+        public static async Task<IResult> ExecuteQuery([FromRoute] Guid id, [FromServices] IOrderRepository orderRepository)
         {
             var order = await orderRepository.GetByIdAsync(id);
 

@@ -10,12 +10,35 @@ namespace Taller_Challenge_Backend.Infrastructure.Data
         {
         }
 
+        public DbSet<User> Users => Set<User>();
         public DbSet<Order> Orders => Set<Order>();
         public DbSet<OrderItem> OrderItems => Set<OrderItem>();
 
         protected override void OnModelCreating(ModelBuilder modelBuilder)
         {
             base.OnModelCreating(modelBuilder);
+
+            // User
+            modelBuilder.Entity<User>(entity =>
+            {
+                entity.HasIndex(u => u.Username).IsUnique();
+                entity.HasIndex(u => u.Email).IsUnique();
+
+                entity.Property(u => u.Username)
+                    .IsRequired()
+                    .HasMaxLength(20);
+
+                entity.Property(u => u.PasswordHash)
+                    .IsRequired()
+                    .HasMaxLength(255);
+
+                entity.Property(u => u.Email)
+                    .IsRequired()
+                    .HasMaxLength(50);
+
+                entity.Property(u => u.RoleId)
+                    .IsRequired();
+            });
 
             // Order
             modelBuilder.Entity<Order>(entity =>
@@ -39,8 +62,7 @@ namespace Taller_Challenge_Backend.Infrastructure.Data
                     .HasMaxLength(50);
 
                 entity.Property(e => e.CreatedAt)
-                    .IsRequired()
-                    .HasDefaultValueSql("GETUTCDATE()");
+                    .IsRequired();
 
                 entity.Property(e => e.Subtotal)
                     .HasColumnType("decimal(18,2)");
