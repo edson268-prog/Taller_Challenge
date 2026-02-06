@@ -1,0 +1,355 @@
+<div class="form-container">
+  <div class="form-header">
+    <button class="btn btn-outline-secondary btn-sm" routerLink="/orders">
+      <i class="fas fa-arrow-left me-2"></i> Back to Orders
+    </button>
+
+    <h2>Create New Service Order</h2>
+    <p class="text-muted">Fill in the details to create a new service order</p>
+  </div>
+
+  <form [formGroup]="orderForm" (ngSubmit)="onSubmit()">
+    <div class="row">
+      <!-- Customer & Vehicle Info -->
+      <div class="col-lg-4">
+        <div class="card mb-4">
+          <div class="card-header">
+            <h5 class="mb-0">
+              <i class="fas fa-user me-2"></i> Customer & Vehicle Information
+            </h5>
+          </div>
+          <div class="card-body">
+            <div class="mb-3">
+              <label for="customerName" class="form-label"
+                >Customer Name *</label
+              >
+              <input
+                type="text"
+                class="form-control"
+                id="customerName"
+                formControlName="customerName"
+                [class.is-invalid]="
+                  customerName.invalid && customerName.touched
+                "
+                placeholder="Name of customer"
+              />
+              @if (customerName.invalid && customerName.touched) {
+                <div class="invalid-feedback d-block">
+                  @if (customerName.errors?.["required"]) {
+                    Customer name is required
+                  }
+                  @if (customerName.errors?.["minlength"]) {
+                    Minimum 2 characters required
+                  }
+                </div>
+              }
+            </div>
+
+            <div class="mb-3">
+              <label for="vehiclePlate" class="form-label"
+                >Vehicle Plate *</label
+              >
+              <input
+                type="text"
+                class="form-control"
+                id="vehiclePlate"
+                formControlName="vehiclePlate"
+                [class.is-invalid]="
+                  vehiclePlate.invalid && vehiclePlate.touched
+                "
+                placeholder="ABC-123"
+              />
+              @if (vehiclePlate.invalid && vehiclePlate.touched) {
+                <div class="invalid-feedback d-block">
+                  @if (vehiclePlate.errors?.["required"]) {
+                    Vehicle plate is required
+                  }
+                  @if (vehiclePlate.errors?.["minlength"]) {
+                    Minimum 3 characters required
+                  }
+                </div>
+              }
+            </div>
+
+            <div class="mb-3">
+              <label for="status" class="form-label">Initial Status</label>
+              <select class="form-select" id="status" formControlName="status">
+                <option value="Pending">🟡 Pending</option>
+                <option value="Approved">🟢 Approved</option>
+                <option value="Completed">🔵 Completed</option>
+              </select>
+            </div>
+          </div>
+        </div>
+
+        <!-- Order Summary -->
+        <div class="card summary-card">
+          <div class="card-header bg-primary text-white">
+            <h5 class="mb-0">
+              <i class="fas fa-receipt me-2"></i> Order Summary
+            </h5>
+          </div>
+          <div class="card-body">
+            <div class="summary-item">
+              <span>Items:</span>
+              <span class="fw-semibold">{{ items.length }}</span>
+            </div>
+
+            <div class="summary-item">
+              <span>Subtotal:</span>
+              <span class="fw-semibold">{{
+                calculateSubtotal() | currency: "USD" : "symbol" : "1.2-2"
+              }}</span>
+            </div>
+
+            <div class="summary-divider"></div>
+
+            <div class="summary-total">
+              <span>ESTIMATED TOTAL:</span>
+              <span class="total-amount">{{
+                calculateSubtotal() | currency: "USD" : "symbol" : "1.2-2"
+              }}</span>
+            </div>
+
+            <div class="mt-4">
+              <div class="alert alert-info">
+                <i class="fas fa-info-circle me-2"></i>
+                <small>
+                  Final total will be calculated after order creation using the
+                  pricing service.
+                </small>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <!-- Service Items -->
+      <div class="col-lg-8">
+        <div class="card mb-4">
+          <div
+            class="card-header d-flex justify-content-between align-items-center"
+          >
+            <h5 class="mb-0">
+              <i class="fas fa-tools me-2"></i> Service Items
+              <span class="badge bg-primary ms-2"
+                >{{ items.length }} items</span
+              >
+            </h5>
+            <button
+              type="button"
+              class="btn btn-success btn-sm"
+              (click)="addItem()"
+            >
+              <i class="fas fa-plus me-2"></i> Add Item
+            </button>
+          </div>
+
+          <div class="card-body">
+            @if (items.length === 0) {
+              <div class="empty-state text-center py-5">
+                <i class="fas fa-clipboard-list fa-3x text-muted mb-3"></i>
+                <p class="text-muted">No service items added yet</p>
+                <button
+                  type="button"
+                  class="btn btn-primary"
+                  (click)="addItem()"
+                >
+                  <i class="fas fa-plus me-2"></i> Add First Item
+                </button>
+              </div>
+            } @else {
+              <div class="table-responsive">
+                <table class="table table-hover">
+                  <thead>
+                    <tr>
+                      <th width="5%">#</th>
+                      <th>Description *</th>
+                      <th width="15%">Quantity *</th>
+                      <th width="15%">Unit Price *</th>
+                      <th width="15%">Total</th>
+                      <th width="10%">Actions</th>
+                    </tr>
+                  </thead>
+                  <tbody formArrayName="items">
+                    @for (item of items.controls; track i; let i = $index) {
+                      <tr [formGroupName]="i">
+                        <td class="text-center">{{ i + 1 }}</td>
+                        <td>
+                          <input
+                            type="text"
+                            class="form-control"
+                            formControlName="description"
+                            [class.is-invalid]="
+                              item.get('description')?.invalid &&
+                              item.get('description')?.touched
+                            "
+                            placeholder="e.g., Oil Change, Brake Pads"
+                          />
+                          @if (
+                            item.get("description")?.invalid &&
+                            item.get("description")?.touched
+                          ) {
+                            <div class="invalid-feedback d-block">
+                              Description is required
+                            </div>
+                          }
+                        </td>
+                        <td>
+                          <input
+                            type="number"
+                            class="form-control"
+                            formControlName="quantity"
+                            min="1"
+                            step="1"
+                            [class.is-invalid]="
+                              item.get('quantity')?.invalid &&
+                              item.get('quantity')?.touched
+                            "
+                            (change)="updateItemTotal(i)"
+                          />
+                          @if (
+                            item.get("quantity")?.invalid &&
+                            item.get("quantity")?.touched
+                          ) {
+                            <div class="invalid-feedback d-block">
+                              @if (item.get("quantity")?.errors?.["required"]) {
+                                Quantity is required
+                              }
+                              @if (item.get("quantity")?.errors?.["min"]) {
+                                Minimum quantity is 1
+                              }
+                            </div>
+                          }
+                        </td>
+                        <td>
+                          <div class="input-group">
+                            <span class="input-group-text">$</span>
+                            <input
+                              type="number"
+                              class="form-control"
+                              formControlName="unitPrice"
+                              min="0.01"
+                              step="0.01"
+                              [class.is-invalid]="
+                                item.get('unitPrice')?.invalid &&
+                                item.get('unitPrice')?.touched
+                              "
+                              (change)="updateItemTotal(i)"
+                            />
+                            @if (
+                              item.get("unitPrice")?.invalid &&
+                              item.get("unitPrice")?.touched
+                            ) {
+                              <div class="invalid-feedback d-block">
+                                @if (
+                                  item.get("unitPrice")?.errors?.["required"]
+                                ) {
+                                  Price is required
+                                }
+                                @if (item.get("unitPrice")?.errors?.["min"]) {
+                                  Minimum price is $0.01
+                                }
+                              </div>
+                            }
+                          </div>
+                        </td>
+                        <td>
+                          <span class="fw-bold text-primary">
+                            {{
+                              calculateItemTotal(i)
+                                | currency: "USD" : "symbol" : "1.2-2"
+                            }}
+                          </span>
+                        </td>
+                        <td>
+                          <button
+                            type="button"
+                            class="btn btn-outline-danger btn-sm"
+                            (click)="removeItem(i)"
+                            [disabled]="items.length === 1"
+                          >
+                            <i class="fas fa-trash"></i>
+                          </button>
+                        </td>
+                      </tr>
+                    }
+                  </tbody>
+                  <tfoot>
+                    <tr>
+                      <td colspan="4" class="text-end fw-bold">Subtotal:</td>
+                      <td class="fw-bold fs-5 text-primary">
+                        {{
+                          calculateSubtotal()
+                            | currency: "USD" : "symbol" : "1.2-2"
+                        }}
+                      </td>
+                      <td></td>
+                    </tr>
+                  </tfoot>
+                </table>
+              </div>
+
+              <div class="text-end mt-3">
+                <button
+                  type="button"
+                  class="btn btn-outline-success"
+                  (click)="addItem()"
+                >
+                  <i class="fas fa-plus me-2"></i> Add Another Item
+                </button>
+              </div>
+            }
+          </div>
+        </div>
+
+        <!-- Form Actions -->
+        <div class="card">
+          <div class="card-body">
+            <div class="d-flex justify-content-between">
+              <button
+                type="button"
+                class="btn btn-outline-secondary"
+                routerLink="/orders"
+              >
+                <i class="fas fa-times me-2"></i> Cancel
+              </button>
+
+              <div>
+                <button
+                  type="submit"
+                  class="btn btn-primary"
+                  [disabled]="orderForm.invalid || submitting"
+                >
+                  @if (submitting) {
+                    <span
+                      class="spinner-border spinner-border-sm me-2"
+                      role="status"
+                    ></span>
+                    Creating...
+                  } @else {
+                    <i class="fas fa-check me-2"></i> Create Order
+                  }
+                </button>
+              </div>
+            </div>
+
+            @if (error) {
+              <div class="alert alert-danger mt-3">
+                <i class="fas fa-exclamation-triangle me-2"></i>
+                {{ error }}
+              </div>
+            }
+
+            @if (successMessage) {
+              <div class="alert alert-success mt-3">
+                <i class="fas fa-check-circle me-2"></i>
+                {{ successMessage }}
+              </div>
+            }
+          </div>
+        </div>
+      </div>
+    </div>
+  </form>
+</div>

@@ -1,0 +1,48 @@
+<div class="login-container">
+  <div class="login-card">
+    <h2 class="text-center mb-4">EX Squared Challenge</h2>
+    <p class="text-center text-muted mb-4">Service Order Management System</p>
+
+    <form (ngSubmit)="onSubmit()" #loginForm="ngForm">
+      <div class="mb-3">
+        <label for="username" class="form-label">User</label>
+        <input
+          type="text"
+          class="form-control"
+          id="username"
+          name="username"
+          [(ngModel)]="credentials.username"
+          placeholder="admin"
+          required
+        />
+      </div>
+
+      <div class="mb-4">
+        <label for="password" class="form-label">Password</label>
+        <input
+          type="password"
+          class="form-control"
+          id="password"
+          name="password"
+          [(ngModel)]="credentials.password"
+          placeholder="••••••••"
+          required
+        />
+      </div>
+
+      <button
+        type="submit"
+        class="btn btn-primary w-100 mb-3"
+        [disabled]="loading"
+      >
+        @if (loading) {
+          <span
+            class="spinner-border spinner-border-sm me-2"
+            role="status"
+          ></span>
+        }
+        Log In
+      </button>
+    </form>
+  </div>
+</div>
