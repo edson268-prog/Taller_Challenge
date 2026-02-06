@@ -4,6 +4,8 @@ using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Hosting;
 using Taller_Challenge_Backend.Domain.Interfaces;
 using Taller_Challenge_Backend.Infrastructure.Extensions;
+using Taller_Challenge_Backend.Infrastructure.Helpers;
+using Taller_Challenge_Backend.Infrastructure.Identity;
 using Taller_Challenge_Backend.Infrastructure.Repositories;
 using Taller_Challenge_Backend.Infrastructure.Services;
 
@@ -14,6 +16,11 @@ namespace Taller_Challenge_Backend.Infrastructure
         public static IServiceCollection AddInfrastructure(this IServiceCollection services, IConfiguration configuration, IHostEnvironment environment)
         {
             services.AddPersistence(configuration, environment);
+
+            // Identity and Authentication
+            services.Configure<JwtSettings>(configuration.GetSection("JwtSettings"));
+            services.AddScoped<JwtHelper>();
+            services.AddScoped<IAuthService, AuthService>();
 
             services.AddScoped<IOrderRepository, OrderRepository>();
 

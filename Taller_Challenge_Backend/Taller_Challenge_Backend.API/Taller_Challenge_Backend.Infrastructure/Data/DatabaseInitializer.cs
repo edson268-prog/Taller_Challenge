@@ -9,65 +9,78 @@ namespace Taller_Challenge_Backend.Infrastructure.Data
         {
             context.Database.EnsureCreated();
 
-            if (context.Orders.Any()) return;
-
-            var orders = new List<Order>();
-
-            var order1 = Order.Create("Carlos Rodríguez", "1234-ABC", new List<OrderItem>
+            if (!context.Users.Any())
             {
-                OrderItem.Create("Synthetic Oil Change", 1, 45.50m),
-                OrderItem.Create("Oil filter", 1, 12.00m)
-            });
-            orders.Add(order1);
+                var users = new List<User>
+                {
+                    User.Create("eibanez268", "ZXhzcXVhcmVkYWRtaW4xMjM=", "eibanez@exsquared.com", Role.Admin), // exsquaredadmin123
+                    User.Create("amonrroy151", "aWFtYXZpc2l0b3I0NTY=", "amonrroy@exsquared.com", Role.Visitor)  // iamavisitor456
+                };
 
-            var order2 = Order.Create("Ana Martínez", "9876-XYZ", new List<OrderItem>
+                context.Users.AddRange(users);
+                context.SaveChanges();
+            }
+
+            if (!context.Orders.Any())
             {
-                OrderItem.Create("Front Brake Pads", 2, 35.00m),
-                OrderItem.Create("Labor - Braking System", 1, 50.00m)
-            });
-            order2.UpdateStatus(OrderStatus.Pending);
-            orders.Add(order2);
+                var orders = new List<Order>
+                {
+                    Order.Create("Carlos Rodríguez", "1234-ABC", new List<OrderItem>
+                    {
+                        OrderItem.Create("Synthetic Oil Change", 1, 45.50m),
+                        OrderItem.Create("Oil filter", 1, 12.00m)
+                    }),
 
-            var order3 = Order.Create("Roberto Gómez", "995-PLU", new List<OrderItem>
-            {
-                OrderItem.Create("12V LTH Battery", 1, 120.00m),
-                OrderItem.Create("Computer Scanning", 1, 25.00m)
-            });
-            orders.Add(order3);
+                    Order.Create("Ana Martínez", "9876-XYZ", new List<OrderItem>
+                    {
+                        OrderItem.Create("Front Brake Pads", 2, 35.00m),
+                        OrderItem.Create("Labor - Braking System", 1, 50.00m)
+                    }),
 
-            var order4 = Order.Create("Lucía Fernández", "1122-DET", new List<OrderItem>
-            {
-                OrderItem.Create("Michelin Primacy tire", 4, 110.00m),
-                OrderItem.Create("Alignment and Balancing", 1, 40.00m)
-            });
-            order4.UpdateStatus(OrderStatus.Completed);
-            orders.Add(order4);
+                    Order.Create("Roberto Gómez", "995-PLU", new List<OrderItem>
+                    {
+                        OrderItem.Create("12V LTH Battery", 1, 120.00m),
+                        OrderItem.Create("Computer Scanning", 1, 25.00m)
+                    }),
 
-            var order5 = Order.Create("Marcos Soto", "3344-NPM", new List<OrderItem>
-            {
-                OrderItem.Create("Polishing and Waxing", 1, 85.00m),
-                OrderItem.Create("Interior Cleaning", 1, 40.00m),
-                OrderItem.Create("Tire change", 1, 120.00m)
-            });
-            orders.Add(order5);
+                    Order.Create("Lucía Fernández", "1122-DET", new List<OrderItem>
+                    {
+                        OrderItem.Create("Michelin Primacy tire", 4, 110.00m),
+                        OrderItem.Create("Alignment and Balancing", 1, 40.00m)
+                    }),
 
-            var order6 = Order.Create("Elena Torres", "1525-BLU", new List<OrderItem>
-            {
-                OrderItem.Create("Rear Shock Absorbers", 2, 95.00m),
-                OrderItem.Create("Suspension Bushings", 4, 15.00m)
-            });
-            order6.UpdateStatus(OrderStatus.Approved);
-            orders.Add(order6);
+                    Order.Create("Marcos Soto", "3344-NPM", new List<OrderItem>
+                    {
+                        OrderItem.Create("Polishing and Waxing", 1, 85.00m),
+                        OrderItem.Create("Interior Cleaning", 1, 40.00m),
+                        OrderItem.Create("Tire change", 1, 120.00m)
+                    }),
 
-            var order7 = Order.Create("Daniel Vargas", "7788-TUV", new List<OrderItem>
-            {
-                OrderItem.Create("LED H7", 2, 22.50m),
-                OrderItem.Create("Minor Electrical Installation", 1, 15.00m)
-            });
-            orders.Add(order7);
+                    Order.Create("Elena Torres", "1525-BLU", new List<OrderItem>
+                    {
+                        OrderItem.Create("Rear Shock Absorbers", 2, 95.00m),
+                        OrderItem.Create("Suspension Bushings", 4, 15.00m)
+                    }),
 
-            context.Orders.AddRange(orders);
-            context.SaveChanges();
+                    Order.Create("Daniel Vargas", "7788-TUV", new List<OrderItem>
+                    {
+                        OrderItem.Create("LED H7", 2, 22.50m),
+                        OrderItem.Create("Minor Electrical Installation", 1, 15.00m)
+                    }),
+
+                    Order.Create("Maria Valenzuela", "1845-CLE", new List<OrderItem>
+                    {
+                        OrderItem.Create("Emergency breaks", 1, 500.00m),
+                        OrderItem.Create("360-Degree Camera", 1, 150.00m)
+                    })
+                };
+
+                orders[3].UpdateStatus(OrderStatus.Completed);
+                orders[5].UpdateStatus(OrderStatus.Approved);
+
+                context.Orders.AddRange(orders);
+                context.SaveChanges();
+            }
         }
     }
 }

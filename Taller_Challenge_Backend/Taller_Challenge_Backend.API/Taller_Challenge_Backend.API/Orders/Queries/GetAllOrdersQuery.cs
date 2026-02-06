@@ -1,27 +1,32 @@
 ﻿using Microsoft.AspNetCore.Mvc;
-using Taller_Challenge_Backend.Domain.Entities;
+using Taller_Challenge_Backend.API.Extensions;
 using Taller_Challenge_Backend.Domain.Enums;
 using Taller_Challenge_Backend.Domain.Interfaces;
-using Taller_Challenge_Backend.API.Extensions;
+using Taller_Challenge_Backend.Domain.Models.Requests;
 
 namespace Taller_Challenge_Backend.API.Orders.Queries
 {
     public static class GetAllOrdersQuery
     {
-        public static async Task<IResult> ExecuteQuery([FromServices] IOrderRepository orderRepository, [FromQuery] string? status = null)
+        public static async Task<IResult> ExecuteQuery([FromServices] IOrderRepository orderRepository,[AsParameters] GetOrdersRequest query)
         {
-            IEnumerable<Order> orders;
+            if (query.Page < 1)
+                return Results.BadRequest("Page must be greater than 0");
 
-            if (!string.IsNullOrEmpty(status) && Enum.TryParse<OrderStatus>(status, true, out var statusEnum))
+            OrderStatus? statusEnum = null;
+            if (!string.IsNullOrEmpty(query.Status) && Enum.TryParse<OrderStatus>(query.Status, true, out var parsedStatus))
             {
-                orders = await orderRepository.GetByStatusAsync(statusEnum);
+                statusEnum = parsedStatus;
             }
-            else
-            {
-                orders = await orderRepository.GetAllAsync();
-            }
+
+            var orders = await orderRepository.GetFilteredOrdersAsync(
+                statusEnum,
+                query.Page,
+                query.PageSize,
+                query.SortOrder);
 
             var response = orders.ToResponse();
+
             return Results.Ok(response);
         }
     }

@@ -1,9 +1,10 @@
 import { CommonModule } from '@angular/common';
-import { Component, OnInit } from '@angular/core';
+import { Component, computed, inject, OnInit } from '@angular/core';
 import { FormsModule } from '@angular/forms';
 import { RouterModule } from '@angular/router';
-import { Order, OrderStatus } from '../../models/order';
+import { Order, OrderParams, OrderStatus } from '../../models/order';
 import { OrderService } from '../../services/order.service';
+import { AuthService } from '../../services/auth.service';
 
 @Component({
   selector: 'app-order-list',
@@ -13,11 +14,19 @@ import { OrderService } from '../../services/order.service';
   styleUrl: './order-list.component.css',
 })
 export class OrderListComponent implements OnInit {
+  private authService = inject(AuthService);
+
+  isAdmin = computed(() => this.authService.currentUser()?.role === 'Admin');
+
   orders: Order[] = [];
   filteredOrders: Order[] = [];
   loading = false;
   error = '';
   searchTerm = '';
+
+  currentPage = 1;
+  pageSize = 5;
+  currentSort = 'desc';
   selectedStatus: OrderStatus | string | null = '';
 
   statusOptions = [
@@ -29,29 +38,47 @@ export class OrderListComponent implements OnInit {
 
   constructor(private orderService: OrderService) {}
 
-  ngOnInit() {
+  ngOnInit(): void {
     this.loadOrders();
   }
 
   loadOrders() {
     this.loading = true;
-    this.orderService.getOrders(this.selectedStatus?.toString()).subscribe({
+
+    const params: OrderParams = {
+      status: this.selectedStatus,
+      page: this.currentPage,
+      pageSize: this.pageSize,
+      sortOrder: this.currentSort,
+    };
+
+    this.orderService.getOrders(params).subscribe({
       next: (orders) => {
-        console.log('Orders loaded:', orders);
         this.orders = orders;
         this.filteredOrders = orders;
         this.loading = false;
       },
       error: (err) => {
-        this.error = 'Error loading orders. Please try again.';
+        this.error = 'Error loading orders.';
         this.loading = false;
-        console.error('Error loading orders:', err);
       },
     });
   }
 
+  changePage(newPage: number) {
+    this.currentPage = newPage;
+    this.loadOrders();
+  }
+
+  changeSort(order: string) {
+    this.currentSort = order;
+    this.currentPage = 1;
+    this.loadOrders();
+  }
+
   filterByStatus(status: OrderStatus | string | null) {
     this.selectedStatus = status;
+    this.currentPage = 1;
     this.loadOrders();
   }
 

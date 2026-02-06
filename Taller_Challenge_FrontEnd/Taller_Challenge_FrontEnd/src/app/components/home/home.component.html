@@ -1,6 +1,6 @@
 <div class="dashboard">
   <div class="welcome-card">
-    <h1>¡Welcome, {{ username }}!</h1>
+    <h1>¡Welcome, {{ username() }}!</h1>
     <p class="lead">Service Order Management System</p>
     <p class="text-muted">
       Manage service orders, calculate prices, and manage customers
@@ -10,7 +10,7 @@
   <div class="quick-actions">
     <h3>Quick Actions</h3>
     <div class="actions-grid">
-      @for (action of quickActions; track action.label) {
+      @for (action of quickActions(); track action.label) {
         <a [routerLink]="action.path" class="action-card">
           <h4>{{ action.label }}</h4>
           <p>{{ action.description }}</p>
