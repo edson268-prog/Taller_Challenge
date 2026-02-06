@@ -1,0 +1,120 @@
+<div class="order-list-container">
+  <div class="header-actions">
+    <h2>Order List</h2>
+    <button class="btn btn-primary" routerLink="/orders/new">
+      <i class="fas fa-plus me-2"></i> New Order
+    </button>
+  </div>
+
+  <div class="filters-card">
+    <div class="row align-items-center">
+      <div class="filter-group">
+        <label class="me-3">Filter by status:</label>
+        <div class="btn-group">
+          @for (status of statusOptions; track status.value) {
+            <button
+              class="btn btn-outline-secondary"
+              [class.active]="selectedStatus === status.value"
+              (click)="filterByStatus(status.value)"
+            >
+              {{ status.label }}
+            </button>
+          }
+        </div>
+      </div>
+    </div>
+  </div>
+
+  @if (loading) {
+    <div class="text-center py-5">
+      <div class="spinner-border text-primary" role="status">
+        <span class="visually-hidden">Loading...</span>
+      </div>
+      <p class="mt-3">Loading Orders...</p>
+    </div>
+  } @else if (error) {
+    <div class="alert alert-danger">
+      <i class="fas fa-exclamation-triangle me-2"></i>
+      {{ error }}
+    </div>
+  } @else {
+    <div class="table-responsive">
+      <table class="table table-hover">
+        <thead>
+          <tr>
+            <th>ID</th>
+            <th>Client</th>
+            <th>Plate</th>
+            <th>Status</th>
+            <th>Items</th>
+            <th>Date</th>
+            <th>Total</th>
+            <th>Actions</th>
+          </tr>
+        </thead>
+        <tbody>
+          @for (order of filteredOrders; track order.id) {
+            <tr>
+              <td class="fw-semibold">#{{ order.id?.substring(0, 8) }}</td>
+              <td>{{ order.customerName }}</td>
+              <td>
+                <span class="badge bg-secondary">{{ order.vehiclePlate }}</span>
+              </td>
+              <td>
+                <span [class]="getStatusBadgeClass(order.status)" class="badge">
+                  {{ order.status }}
+                </span>
+              </td>
+              <td>{{ order.items.length || 0 }} items</td>
+              <td>{{ order.createdAt | date: "dd/MM/yyyy" }}</td>
+              <td class="fw-bold">
+                {{ order.totalAmount | currency: "USD" : "symbol" : "1.2-2" }}
+              </td>
+              <td>
+                <div class="btn-group btn-group-sm">
+                  <button
+                    class="btn btn-outline-primary"
+                    [routerLink]="['/orders', order.id]"
+                  >
+                    <i class="fas fa-eye"></i>
+                  </button>
+                </div>
+              </td>
+            </tr>
+          } @empty {
+            <tr>
+              <td colspan="8" class="text-center py-4">
+                <i class="fas fa-inbox fa-2x text-muted mb-3"></i>
+                <p>No orders registered</p>
+                <button class="btn btn-primary" routerLink="/orders/new">
+                  Create first order
+                </button>
+              </td>
+            </tr>
+          }
+        </tbody>
+      </table>
+    </div>
+
+    @if (filteredOrders.length > 0) {
+      <div class="d-flex justify-content-between align-items-center mt-3">
+        <div>
+          Showing {{ filteredOrders.length }} of {{ orders.length }} orders
+        </div>
+        <nav>
+          <ul class="pagination mb-0">
+            <li class="page-item disabled">
+              <a class="page-link" href="#">Previous</a>
+            </li>
+            <li class="page-item active">
+              <a class="page-link" href="#">1</a>
+            </li>
+            <li class="page-item">
+              <a class="page-link" href="#">Next</a>
+            </li>
+          </ul>
+        </nav>
+      </div>
+    }
+  }
+</div>
